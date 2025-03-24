@@ -1,7 +1,5 @@
 import express, { Request, Response } from "express";
 import { parse } from "url";
-import nodemailer from "nodemailer";
-import axios from "axios";
 import { RequestHandler } from "express";
 import { Alert } from "./models/alert.model";
 import { connectToDatabase } from "./database.connection";
@@ -53,60 +51,6 @@ app.post("/alerts", (async (req: Request, res: Response) => {
   }
 }) as RequestHandler);
 
-// Function to check bus availability
-const checkAvailability = async () => {
-  const alerts = await Alert.find({});
-
-  for (const alert of alerts) {
-    const apiUrl = `https://onlineksrtcswift.com/api/resource/searchRoutesV4?fromCityID=${alert.fromCity}&toCityID=${alert.toCity}&journeyDate=${alert.date}&mode=oneway`;
-
-    try {
-      const response = await axios.get(apiUrl);
-      const buses = response.data; // Assuming response contains a list of buses
-
-      const availableBus = buses.find((bus: any) => {
-        const departureTime = new Date(bus.DepartureTime);
-        const start = new Date(`${alert.date}T${alert.timeRangeStart}:00`);
-        const end = new Date(`${alert.date}T${alert.timeRangeEnd}:00`);
-        return bus.AvailableSeats > 0 && departureTime >= start && departureTime <= end;
-      });
-
-      if (availableBus) {
-        sendEmail(alert.email, availableBus);
-      }
-    } catch (error) {
-      console.error("Error fetching bus data:", error);
-    }
-  }
-};
-
-// Function to send email using Nodemailer
-const sendEmail = (email: string, bus: any) => {
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: "your-email@gmail.com",
-      pass: "your-password",
-    },
-  });
-
-  const mailOptions = {
-    from: "your-email@gmail.com",
-    to: email,
-    subject: "Bus Seat Alert 🚍",
-    text: `Seats available for ${bus.RouteName}! Price: ₹${bus.Fare}. Book now!`,
-  };
-
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.error("Error sending email:", error);
-    } else {
-      console.log("Email sent:", info.response);
-    }
-  });
-};
-
-// Run every 15 minutes using GitHub Actions or Node-cron
 
 app.listen(3000, () => {
   console.log("Server is running on port 3000");
