@@ -40,6 +40,7 @@ const sendEmail = async (email: string, buses: any[]) => {
 };
 
 const checkAvailability = async (alerts: IAlert[]) => {
+  console.log("Checking availability");
   try {
 
     for (const alert of alerts) {

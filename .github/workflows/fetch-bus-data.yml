@@ -24,4 +24,4 @@ jobs:
           MONGO_URI: ${{ secrets.MONGO_URI }}
           EMAIL: ${{ secrets.EMAIL }}
           PASSWORD: ${{ secrets.PASSWORD }}
-        run: node src/alerts.ts
+        run: npm run check-alerts

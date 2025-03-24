@@ -43,7 +43,6 @@ app.post("/alerts", (async (req: Request, res: Response) => {
   };
 
   const createdAlert = await Alert.create(alert);
-  console.log(createdAlert);
   if (createdAlert) {
     res.json({ message: "✅ Alert created successfully!" });
   } else {
