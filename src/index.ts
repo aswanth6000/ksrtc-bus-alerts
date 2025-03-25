@@ -70,9 +70,12 @@ app.post("/alerts", (async (req: Request, res: Response) => {
       timeRangeStart,
       timeRangeEnd,
     };
-    const createdEmail = await Email.create({ email });
-    if (!createdEmail) {
-      return res.status(500).json({ message: "❌ Failed to create email" });
+    const existingEmail = await Email.findOne({ email });
+    if (!existingEmail) {
+      const createdEmail = await Email.create({ email });
+      if (!createdEmail) {
+        return res.status(500).json({ message: "❌ Failed to create email" });
+      }
     }
     const createdAlert = await Alert.create(alert);
     if (createdAlert) {
