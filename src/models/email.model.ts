@@ -8,4 +8,4 @@ const EmailSchema = new Schema({
   email: { type: String, required: true },
 });
 
-export default mongoose.model<IEmail>("Email", EmailSchema);
+export const Email = mongoose.model<IEmail>("Email", EmailSchema);
