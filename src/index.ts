@@ -3,11 +3,19 @@ import { parse } from "url";
 import { RequestHandler } from "express";
 import rateLimit from 'express-rate-limit';
 import { Alert } from "./models/alert.model";
+import Email from "./models/email.model";
 import { connectToDatabase } from "./database.connection";
 import serverless from "serverless-http";
-
+import cors from "cors";
 const app = express();
 app.use(express.json());
+
+app.use(cors({
+  origin: "https://ksrtc-bus-alerts.vercel.app/",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+}));
 
 // Create a limiter that allows 10 requests per IP address per 15 minutes
 const limiter = rateLimit({
@@ -53,6 +61,7 @@ app.post("/alerts", (async (req: Request, res: Response) => {
     timeRangeStart,
     timeRangeEnd,
   };
+  await Email.create({ email });
 
   const createdAlert = await Alert.create(alert);
   if (createdAlert) {
