@@ -1,11 +1,23 @@
 import express, { Request, Response } from "express";
 import { parse } from "url";
 import { RequestHandler } from "express";
+import rateLimit from 'express-rate-limit';
 import { Alert } from "./models/alert.model";
 import { connectToDatabase } from "./database.connection";
+import serverless from "serverless-http";
 
 const app = express();
 app.use(express.json());
+
+// Create a limiter that allows 10 requests per IP address per 15 minutes
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // limit each IP to 10 requests per windowMs
+  message: { message: '❌ Too many requests, please try again later.' }
+});
+
+// Apply the rate limiting middleware to the alerts endpoint
+app.use('/alerts', limiter);
 
 connectToDatabase();
 
@@ -50,7 +62,8 @@ app.post("/alerts", (async (req: Request, res: Response) => {
   }
 }) as RequestHandler);
 
-
-app.listen(3000, () => {
-  console.log("Server is running on port 3000");
+app.get('/health', (req: Request, res: Response) => {
+  res.json({ message: '✅ Server is running' });
 });
+
+export const handler = serverless(app);

@@ -1,0 +1,20 @@
+service: bus-seat-alert
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-1
+
+
+functions:
+  app:
+    handler: index.handler
+    events:
+      - httpApi: "*"
+plugins:
+  - serverless-env-generator
+
+custom:
+  envFile:
+    - .env
+    
