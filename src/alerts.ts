@@ -33,17 +33,18 @@ const sendEmail = async (email: string, buses: any[]) => {
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log(`📧 Alert sent to ${email}`);
   } catch (error) {
     console.error('Error sending email:', error);
   }
 };
 
 const checkAvailability = async (alerts: IAlert[]) => {
-  console.log("Checking availability");
   try {
-
     for (const alert of alerts) {
+      // Convert DD-MM-YYYY to YYYY-MM-DD format for proper Date parsing
+      const [day, month, year] = alert.date.split('-');
+      const formattedDate = `${year}-${month}-${day}`;
+
       const apiUrl = `https://onlineksrtcswift.com/api/resource/searchRoutesV4?fromCityID=${alert.fromCity}&toCityID=${alert.toCity}&journeyDate=${alert.date}&mode=oneway`;
 
       const response = await axios.get(apiUrl);
@@ -51,8 +52,8 @@ const checkAvailability = async (alerts: IAlert[]) => {
 
       const availableBuses = buses.filter((bus: any) => {
         const departureTime = new Date(bus.DepartureTime);
-        const start = new Date(`${alert.date}T${alert.timeRangeStart}:00`);
-        const end = new Date(`${alert.date}T${alert.timeRangeEnd}:00`);
+        const start = new Date(`${formattedDate}T${alert.timeRangeStart}:00`);
+        const end = new Date(`${formattedDate}T${alert.timeRangeEnd}:00`);
 
         return (
           bus.AvailableSeats > 0 &&
